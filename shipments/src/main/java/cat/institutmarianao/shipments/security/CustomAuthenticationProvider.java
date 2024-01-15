@@ -1,0 +1,65 @@
+package cat.institutmarianao.shipments.security;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import cat.institutmarianao.shipments.model.User;
+
+@Component
+@PropertySource("classpath:messages.properties")
+public class CustomAuthenticationProvider implements AuthenticationProvider {
+	private static final String HOST = "https://localhost";// TODO config
+	private static final String PORT = "8443";// TODO config
+
+	@Autowired
+	private RestTemplate restTemplate;
+
+	@Value("${exception.badCredentials}")
+	private String badCredentialsMessage;
+
+	@Override
+	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+		final String uri = HOST + ":" + PORT + "/users/authenticate";
+
+		String username = authentication.getName();
+		String password = authentication.getCredentials().toString();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		Map<String, String> postBody = new HashMap<>();
+		postBody.put("username", username);
+		postBody.put("password", password);
+
+		HttpEntity<Map<String, String>> request = new HttpEntity<>(postBody, headers);
+
+		try {
+			User userDetails = restTemplate.postForObject(uri, request, User.class);
+			if (userDetails != null) {
+				return new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
+			}
+		} catch (Exception e) {
+			// Do nothing
+		}
+		throw new BadCredentialsException(badCredentialsMessage);
+	}
+
+	@Override
+	public boolean supports(Class<?> authentication) {
+		return authentication.equals(UsernamePasswordAuthenticationToken.class);
+	}
+}
