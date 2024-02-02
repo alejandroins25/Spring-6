@@ -31,7 +31,7 @@ public class ShipmentController {
 	@Autowired
 	private UserService userService;
 
-	@Autowired
+	// @Autowired
 	private ShipmentService shipmentService;
 
 	@ModelAttribute("user")
