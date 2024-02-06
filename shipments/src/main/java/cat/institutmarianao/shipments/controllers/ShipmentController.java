@@ -45,6 +45,8 @@ public class ShipmentController {
 	public ModelAndView newShipment(@ModelAttribute("user") User user) {
 
 		// TODO - New shipment
+		
+		
 
 		return null;
 	}
