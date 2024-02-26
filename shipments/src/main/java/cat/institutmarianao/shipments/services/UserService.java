@@ -8,6 +8,7 @@ import cat.institutmarianao.shipments.model.Courier;
 import cat.institutmarianao.shipments.model.LogisticsManager;
 import cat.institutmarianao.shipments.model.Receptionist;
 import cat.institutmarianao.shipments.model.User;
+import cat.institutmarianao.shipments.model.forms.UsersFilter;
 
 public interface UserService extends UserDetailsService {
 	List<User> getAllUsers();
@@ -23,4 +24,5 @@ public interface UserService extends UserDetailsService {
 	void update(User user);
 
 	void remove(String username);
+
 }

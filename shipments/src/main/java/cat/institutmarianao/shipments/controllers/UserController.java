@@ -1,5 +1,7 @@
 package cat.institutmarianao.shipments.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,7 +16,9 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -132,11 +136,11 @@ public class UserController {
 		return usersView;
 	}
 
-//	@PostMapping("/ajax/list")
-//	@ResponseBody
-//	public List<User> filterUserList(@RequestBody UsersFilter requestFilter) {
-//		return userService.filterUsers(requestFilter);
-//	}
+	/*@PostMapping("/ajax/list")
+	@ResponseBody
+	public List<User> filterUserList(@RequestBody UsersFilter requestFilter) {
+		return userService.filterUsers(requestFilter);
+	}*/
 
 	@GetMapping("/remove/{username}")
 	public String removeUser(@PathVariable("username") String username) {

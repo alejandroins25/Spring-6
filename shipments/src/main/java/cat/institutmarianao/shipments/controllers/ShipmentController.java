@@ -1,5 +1,7 @@
 package cat.institutmarianao.shipments.controllers;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +21,8 @@ import cat.institutmarianao.shipments.model.Assignment;
 import cat.institutmarianao.shipments.model.Delivery;
 import cat.institutmarianao.shipments.model.Shipment;
 import cat.institutmarianao.shipments.model.Shipment.Status;
+import cat.institutmarianao.shipments.model.forms.ShipmentsFilter;
+
 import cat.institutmarianao.shipments.model.User;
 import cat.institutmarianao.shipments.services.ShipmentService;
 import cat.institutmarianao.shipments.services.UserService;
@@ -31,7 +35,7 @@ public class ShipmentController {
 	@Autowired
 	private UserService userService;
 
-	// @Autowired
+	@Autowired
 	private ShipmentService shipmentService;
 
 	@ModelAttribute("user")
@@ -44,43 +48,87 @@ public class ShipmentController {
 	@GetMapping("/new")
 	public ModelAndView newShipment(@ModelAttribute("user") User user) {
 
-		// TODO - New shipment
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String username = authentication.getName();
+		ModelAndView newShipmentView = new ModelAndView("shipment");
+		Shipment shipment = new Shipment();
 		
+		newShipmentView.getModelMap().addAttribute("shipment", shipment);
+		shipment.setReceptionist(username);
 		
-
-		return null;
+		return newShipmentView;
 	}
 
 	@PostMapping("/new")
 	public String submitNewShipment(@Validated Shipment shipment, BindingResult result, ModelMap modelMap) {
 
-		// TODO - Submit new shipment
+		if (result.hasErrors()) {
+			return "shipment";
+		}
+		
+		shipmentService.add(shipment);
 
-		return null;
+		return "redirect:/shipments/list/PENDING";
 	}
+
 
 	@GetMapping("/list/{shipment-status}")
 	public ModelAndView allShipmentsList(@ModelAttribute("user") User user,
 			@PathVariable("shipment-status") Status shipmentStatus) {
 
-		// TODO - Retrieve all shipments by status
+		ModelAndView shipmentsView = new ModelAndView("shipments");
+		
+		Assignment assignment = new Assignment();
+		assignment.setPerformer(user.getUsername());
+		
+		Delivery delivery = new Delivery();
+		delivery.setPerformer(user.getUsername());
 
-		return null;
+		ShipmentsFilter shipmenFilter = new ShipmentsFilter();
+		shipmenFilter.setStatus(shipmentStatus);
+		
+		shipmentsView.getModelMap().addAttribute("shipmentStatus", shipmentStatus);
+		
+		switch (user.getRole()) {
+        case RECEPTIONIST:
+        	shipmenFilter.setReceptionist(user.getUsername());
+        	shipmentsView.getModelMap().addAttribute("couriers", userService.getAllCourier());
+            shipmentsView.getModelMap().addAttribute("shipments", shipmentService.filterShipments(shipmenFilter));
+            shipmentsView.getModelMap().addAttribute("assignment", assignment);
+    		shipmentsView.getModelMap().addAttribute("delivery", delivery);
+            break;
+        case LOGISTICS_MANAGER:
+        	shipmentsView.getModelMap().addAttribute("couriers", userService.getAllCourier());
+            shipmentsView.getModelMap().addAttribute("shipments", shipmentService.filterShipments(shipmenFilter));
+            shipmentsView.getModelMap().addAttribute("assignment", assignment);
+    		shipmentsView.getModelMap().addAttribute("delivery", delivery);
+            break;
+        case COURIER:
+        	shipmenFilter.setCourierAssigned(user.getUsername());
+            shipmentsView.getModelMap().addAttribute("shipments", shipmentService.filterShipments(shipmenFilter));
+            shipmentsView.getModelMap().addAttribute("assignment", assignment);
+    		shipmentsView.getModelMap().addAttribute("delivery", delivery);
+            break;
+        default:
+            break;
+    }
+
+		return shipmentsView;
 	}
 
 	@PostMapping("/assign")
 	public String assignShipment(@Validated Assignment assignment) {
 
-		// TODO - Save shipment assignment
-
-		return null;
+		assignment.setDate(new Date());
+		shipmentService.tracking(assignment);
+		return "redirect:/shipments/list/PENDING";
 	}
 
 	@PostMapping("/deliver")
 	public String deliverShipment(@Validated Delivery delivery) {
 
-		// TODO - Save shipment delivery
-
-		return null;
+		delivery.setDate(new Date());
+		shipmentService.tracking(delivery);
+		return "redirect:/shipments/list/IN_PROCESS";
 	}
 }

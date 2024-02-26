@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="https://wwww.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
 <head th:replace="~{fragments/template :: head}">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
 	rel="stylesheet">
@@ -13,7 +11,6 @@
 	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <script
 	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
-
 <link rel="stylesheet" th:href="@{/css/main.css}"
 	href="../static/css/main.css" />
 <title>New shipment</title>
@@ -22,15 +19,145 @@
 	<section class="container">
 		<header class="jumbotron" th:replace="~{fragments/template :: header}">
 			Shipments Header </header>
-
 		<nav class="navbar navbar-default"
 			th:replace="~{fragments/template :: navbar}">Navbar</nav>
-
 		<section class="card my-1"
 			th:replace="~{fragments/template :: heading}">Heading</section>
-
-		TODO - Shipment form
+		<!-- TODO - Shipment form -->
+		
+		<form action="#" th:action="@{#ctx.springRequestContext.requestUri}"
+		method="post" th:object="${shipment}" class="form-horizontal">
+		
+		<div class="container px-4">
+			<div class="row">
+				<div class="g-2 col-md-8">
+					<div th:if="${#fields.hasAnyErrors()}"
+            			class="row alert alert-danger alert-dismissible p-1"
+            			role="alert">
+           			<ul>
+               			<li th:each="err : ${#fields.detailedErrors()}"
+                   			th:class="${err.global} ? fst-italic">
+                   			<span th:text="${err.global}? '*' : #{'shipment.'+${err.fieldName}}">
+                       			Nombre del campo</span>: <span th:utext="${err.message}">Mensaje de error</span>
+               			</li>
+           			</ul>
+           			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+       			</div>
+				</div>
+			</div>
+			
+			<div class="row">
+				<label class="form-label g-2 col-md-1 p-1" for="tracking"
+						th:text="#{shipment.tracking.num}">Tracking #</label>
+					<div class="g-2 col-md-3">
+						<input type="number" id="tracking" th:field="*{trackingNumber}"
+							class="form-control" th:errorclass="'is-invalid'" min="0"
+							th:placeholder="#{shipment.tacking.num.placeholder}"
+							style="text-align: right"/>
+					</div>
+					
+   			<label class="form-label g-2 col-md-1 p-1" th:for="receptionist"
+   				th:text="#{shipment.receptionist}">Receptionist</label>
+   				<div class="g-2 col-md-7">
+       				<input th:id="receptionist" th:field="*{receptionist}"
+       				class="form-control" th:errorclass="'is-invalid'" readonly="readonly" />
+   				</div>
+   		</div>
+   			
+			
+			<div class="row">
+				<label class="form-label g-2 col-md-2 p-1" for="priority"
+					th:text="#{dialogs.shipment.assign.priority}">Priority</label>
+				<div class="g-2 col-md-2">
+					<input type="number" id="priority" th:field="*{priority}"
+						class="form-control" th:errorclass="'is-invalid'"
+						th:min="${T(cat.institutmarianao.shipments.model.Assignment).MIN_PRIORITAT}"
+						th:max="${T(cat.institutmarianao.shipments.model.Assignment).MAX_PRIORITAT}" value="1"
+						th:placeholder="#{shipment.priority.placeholder}">
+				</div>
+			
+				<label class="form-label g-2 col-md-1 p-1" for="category"
+						th:text="#{shipment.category}">Category</label>
+					<div class="g-2 col-md-3">
+						<select id="category" th:field="*{category}" class="form-select"
+							th:errorclass="'is-invalid'">
+							<option
+								th:each="category : ${T(cat.institutmarianao.shipments.model.Shipment.Category).values()}"
+								th:value="${category}"
+								th:text="#{'shipment.category.' + ${category}}">Particular</option>
+							<option th:remove="all">Company</option>
+							<option th:remove="all">Government</option>
+						</select>
+					</div>	
+			</div>
+			
+			<div class="row">
+   			<div th:replace="~{fragments/forms :: address('sender')}">Sender form</div>
+			</div>
+			
+			<div class="row">
+				<div th:replace="~{fragments/forms :: address('recipient')}">Recipient form</div>
+			</div>
+			
+			<div class="row">
+				<h5 class="form-label g-2 col-md-12 p-1 bg-light">&nbsp;</h5>
+			</div>
+			
+			<div class="row">
+				<label class="form-label g-2 col-md-1 p-1" th:for="weight"
+					th:text="#{shipment.weight}">Weight</label>
+				<div class="g-2 col-md-1">
+					<input th:id="weight" type="number" min="0" th:field="*{weight}"
+					class="form-control" th:errorclass="'is-valid'"
+					th:placeholder="#{shipment.weight}" placeholder="Weight">
+				</div>
+				
+				<label class="form-label g-2 col-md-1 p-1" th:for="height"
+					th:text="#{shipment.height}">Height</label>
+				<div class="g-2 col-md-1">
+					<input th:id="Height" type="number" min="0" th:field="*{Height}"
+					class="form-control" th:errorclass="'is-valid'"
+					th:placeholder="#{shipment.height}" placeholder="Height">
+				</div>
+				
+				<label class="form-label g-2 col-md-1 p-1" th:for="width"
+					th:text="#{shipment.width}">Width</label>
+				<div class="g-2 col-md-1">
+					<input th:id="Width" type="number" min="0" th:field="*{Width}"
+					class="form-control" th:errorclass="'is-valid'"
+					th:placeholder="#{shipment.width}" placeholder="Width">
+				</div>
+				
+				<label class="form-label g-2 col-md-1 p-1" th:for="width"
+					th:text="#{shipment.length}">Length</label>
+				<div class="g-2 col-md-1">
+					<input th:id="Length" type="number" min="0" th:field="*{Length}"
+					class="form-control" th:errorclass="'is-valid'"
+					th:placeholder="#{shipment.length}" placeholder="Length">
+				</div>
+			    <div class="form-label g-2 col-md-1 p-1">
+			        <input type="checkbox" id="express" th:field="*{express}" class="form-check-input" />
+			        <label class="form-check-label" for="express" th:text="#{shipment.express}">Express</label>
+			    </div>
+			    <div class="form-label g-2 col-md-1 p-1">
+			        <input type="checkbox" id="fragile" th:field="*{fragile}" class="form-check-input" />
+			        <label class="form-check-label" for="fragile" th:text="#{shipment.fragile}">Fragile</label>
+			    </div>
+			</div>
+			<div class="row">
+   			<label class="form-label g-2 col-md-1 p-1" for="note" th:text="#{shipment.note}">Note</label>
+   			<div class="g-2 col-md-7">
+       			<textarea id="note" th:field="*{note}" class="form-control" th:errorclass="'is-invalid'"
+                 	th:placeholder="#{shipment.note}" rows="3"></textarea>
+   			</div>
+			</div>
+			<br>
+			<div class="g-2 col-md-4">
+       		<input th:if="not ${edit}" class="btn btn-success" type="submit"
+				th:value="#{shipment.add.new}"/>
+   		</div>
+		</div>
+		</form>
 	</section>
-
 </body>
 </html>

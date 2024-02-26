@@ -23,6 +23,7 @@ import cat.institutmarianao.shipments.model.LogisticsManager;
 import cat.institutmarianao.shipments.model.Receptionist;
 import cat.institutmarianao.shipments.model.User;
 import cat.institutmarianao.shipments.model.User.Role;
+import cat.institutmarianao.shipments.model.forms.UsersFilter;
 import cat.institutmarianao.shipments.services.UserService;
 
 @Service
@@ -134,4 +135,5 @@ public class UserServiceImpl implements UserService {
 
 		restTemplate.delete(uriTemplate.buildAndExpand(uriVariables).toUriString(), User.class);
 	}
+
 }
